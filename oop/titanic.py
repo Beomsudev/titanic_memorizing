@@ -135,6 +135,57 @@ class Titanic:
         for dataset in train_and_test:
             dataset['Sex'] = dataset['Sex'].astype(str)
     
+        b = train.Embarked.value_counts(dropna=False)
+        print(b)
+        
+        for dataset in train_and_test:
+            dataset['Embarked'] = dataset['Embarked'].fillna('S')
+            dataset['Embarked'] = dataset['Embarked'].astype(str)
+
+        for dataset in train_and_test:
+            dataset['Age'].fillna(dataset['Age'].mean(), inplace=True)
+            dataset['Age'] = dataset['Age'].astype(int)
+            train['AgeBand'] = pd.cut(train['Age'], 5)
+        print(train[['AgeBand', 'Survived']].groupby(['AgeBand'], as_index=False).mean())
+
+        for dataset in train_and_test:
+            dataset.loc[dataset['Age'] <= 16, 'Age'] = 0
+            dataset.loc[(dataset['Age'] > 16) & (dataset['Age'] <= 32), 'Age'] = 1
+            dataset.loc[(dataset['Age'] > 32) & (dataset['Age'] <= 48), 'Age'] = 2
+            dataset.loc[(dataset['Age'] > 48) & (dataset['Age'] <= 64), 'Age'] = 3
+            dataset.loc[dataset['Age'] >= 64, 'Age'] = 4
+            dataset['Age'] = dataset['Age'].map( {0:'Child', 1:'Young', 2:'Middle', 3:'Prime', 4:'Lod', }).astype(str)
+
+        print(train[['Pclass', 'Fare']].groupby(['Pclass'], as_index=False).mean())
+        print("")
+        print(test[test['Fare'].isnull()]['Pclass'])
+
+        for dataset in train_and_test:
+            dataset['Fare'] = dataset['Fare'].fillna(13.675)
+
+        for dataset in train_and_test:
+            dataset.loc[dataset['Fare'] <= 7.854, 'Fare'] = 0
+            dataset.loc[(dataset['Fare'] > 7.854) & (dataset['Fare'] <= 10.5), 'Fare'] = 1
+            dataset.loc[(dataset['Fare'] > 10.5) & (dataset['Fare'] <= 21.679), 'Fare'] = 2
+            dataset.loc[(dataset['Fare'] > 21.679) & (dataset['Fare'] <= 39.688), 'Fare'] = 3
+            dataset.loc[dataset['Fare'] >= 39.688, 'Fare'] = 4
+            dataset['Fare'] = dataset['Fare'].astype(int)
+
+        for dataset in train_and_test:
+            dataset['Family'] = dataset['Parch'] + dataset['SibSp']
+            dataset['Family'] = dataset['Family'].astype(int)
+
+        features_drop = ['Name', 'Ticket', 'Cabin', 'SibSp', 'Parch']
+        train = train.drop(features_drop, axis=1)
+        test = test.drop(features_drop, axis=1)
+        train = train.drop(['PassengerId', 'AgeBand'], axis=1)
+
+        print(train.head())
+        print(train.info())
+
+        print(test.head())
+        print(test.info())
+
         print('***** PREPROCESSING END *****')
 
 
