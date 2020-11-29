@@ -33,11 +33,11 @@ class Titanic:
         # print('***** EMBARKED PIE CHART CHECK *****')
         # self.pie_chart('Embarked')
 
-        print('***** SIBSP BAR CHART CHECK *****')
-        self.bar_chart('SibSp')
+        # print('***** SIBSP BAR CHART CHECK *****')
+        # self.bar_chart('SibSp')
 
-        print('***** PARCH BAR CHART CHECK *****')
-        self.bar_chart('Parch')
+        # print('***** PARCH BAR CHART CHECK *****')
+        # self.bar_chart('Parch')
 
         '''
         성별이 여성일 수록(영화 타이타닉에서 나온 것 처럼 여성과 아이부터 먼저 살렸기 때문이 아닐까 싶고),
@@ -47,6 +47,7 @@ class Titanic:
         형제, 자매, 배우자, 부모, 자녀와 함께 배에 탔다면,
         생존 확률이 더 높았다는 것을 볼 수 있다.
         '''
+        self.preprocessing()
 
     def read_train(self):
         print('***** READ TRAIN DATA START *****')
@@ -93,7 +94,49 @@ class Titanic:
         plt.show()
 
     def preprocessing(self):
-        pass
+        print('***** PREPROCESSING START *****')
+
+        train = self.train
+        test = self.test
+        train_and_test = [train, test]
+
+        for dataset in train_and_test:
+            dataset['Title'] = dataset.Name.str.extract('([A-Za-z]+)\.')
+        
+        print(train.head())
+
+        t = pd.crosstab(train['Title'], train['Sex'])
+        print(t)
+
+        for dataset in train_and_test:
+            dataset['Title'] = dataset['Title'].replace(['Capt',
+                                                        'Col',
+                                                        'Countess',
+                                                        'Don',
+                                                        'Dona',
+                                                        'Dr',
+                                                        'Jonkheer',
+                                                        'Lady',
+                                                        'Major',
+                                                        'Rev',
+                                                        'Sir'],
+                                                        'Other')
+
+            dataset['Title'] = dataset['Title'].replace('Mlle', 'Miss')
+            dataset['Title'] = dataset['Title'].replace('Mme', 'Mrs')
+            dataset['Title'] = dataset['Title'].replace('Ms', 'Miss')
+
+        a = train[['Title', 'Survived']].groupby(['Title'], as_index=False).mean()
+        print(a)
+
+        for dataset in train_and_test:
+            dataset['Title'] = dataset['Title'].astype(str)
+
+        for dataset in train_and_test:
+            dataset['Sex'] = dataset['Sex'].astype(str)
+    
+        print('***** PREPROCESSING END *****')
+
 
 if __name__ == "__main__":
     t = Titanic()
