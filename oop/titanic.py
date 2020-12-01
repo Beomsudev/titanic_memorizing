@@ -22,6 +22,11 @@ class Titanic:
         self.train = self.read_train()
         self.test = self.read_test()
 
+        self.train_label = object
+        self.train_data = object
+        self.test_data = object
+
+
     def hook(self):
         
         # print('***** SEX PIE CHART CHECK *****')
@@ -49,6 +54,8 @@ class Titanic:
         '''
         self.preprocessing()
 
+        self.modeling()
+    
     def read_train(self):
         print('***** READ TRAIN DATA START *****')
         train = pd.read_csv(self.path + '\\train.csv')
@@ -180,14 +187,46 @@ class Titanic:
         test = test.drop(features_drop, axis=1)
         train = train.drop(['PassengerId', 'AgeBand'], axis=1)
 
+        train = pd.get_dummies(train)
+        test = pd.get_dummies(test)
+
+        train_label = train['Survived']
+        train_data = train.drop('Survived', axis=1)
+        test_data = test.drop('PassengerId', axis=1).copy()
+
+        # One-hot-encoding for categorical variables
+        train = pd.get_dummies(train)
+        test = pd.get_dummies(test)
+
+        train_label = train['Survived']
+        train_data = train.drop('Survived', axis=1)
+        test_data = test.drop("PassengerId", axis=1).copy()
+
+        self.train_label = train_label
+        self.train_data = train_data
+        self.test_data = test_data
+
         print(train.head())
         print(train.info())
 
         print(test.head())
         print(test.info())
 
+        print('*'*30)
         print('***** PREPROCESSING END *****')
 
+    def modeling(self):
+        print('***** MODELING START *****')
+
+        train_label = self.train_label
+        train_data = self.train_data 
+        test_data = self.test_data
+
+        train_data, train_label = shuffle(train_data, train_label, random_state = 5)
+        print(train_data)
+        print(train_label)
+
+        print('***** MODELING END *****')
 
 if __name__ == "__main__":
     t = Titanic()
